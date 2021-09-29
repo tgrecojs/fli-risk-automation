@@ -15,7 +15,24 @@ from contract_addresses import *
 #   // Logger.log(response.getContentText());
 #   // getGraphData()
 #   return populateCells()
+def divideBy(x):
+    def numerator(y):
+        return int(y / x);
+    return numerator
+  
+def getPercent(y): 
+  return divideBy(1000000000000000000)(y);
 
+def multiplyBy(x):
+  def input(y):
+    return int(x + y)
+  return input
+
+def handleFloat(x):
+  return multiplyBy(1e-18)(x);
+  
+def roundFloat(x):
+  return round(float(handleFloat(x)), 2)
 
 w3 = Web3(Web3.HTTPProvider(INFURA_URL))
 
@@ -30,14 +47,14 @@ def getContract(address):
 
 def getTotalSupply(address):
   check = w3.toChecksumAddress(address)
-  contract = w3.eth.contract(address=check, abi=getAbi(address))
+  contract = getContract(check, getAbi(address))
   execut = contract.functions.totalSupply().call()
   execut_rounded = int(execut/1000000000000000000)
 #   print(f'The current total supply is {execut_rounded}')
-  return(execut_rounded)
+  return(getPercent(execut))
   
 def getCurrentLeverageRatio(address):
-  contract = w3.eth.contract(address=address, abi=getAbi(address))
+  contract = getContract(address, getAbi(address))
   leverageRatio = contract.functions.getCurrentLeverageRatio().call()
   leverageRatioRounded = round(leverageRatio/1000000000000000000,2)
 #   print(f'the current leverage ratio is {leverageRatioRounded}')
@@ -54,17 +71,10 @@ def getCurrentLeverageRatio(address):
 #     bytes deleverExchangeData;                       // Arbitrary exchange data passed into rebalance function for delevering
 # }
 
-
 def getExecution(address):
-  contract = w3.eth.contract(address=address, abi=getAbi(address))
-  execut = contract.functions.getExecution().call()
-  unutilizedLeveragePercent = int(execut[0]/1000000000000000000)
-  twapMaxTradeSize = int(execut[1]/1000000000000000000)
-  coolDownPeriod = int(execut[2])
-  slippageAllowance = int(execut[3]/1000000000000000000)
-  exchangeName = execut[4]
+  execut = getContract(address, getAbi(address)).functions.getExecution().call()
 #   print(f'This is unutilized leverage percentage {unutilizedLeveragePercent} and this is twapmaxtradesize {twapMaxTradeSize}, and here is cooldown {coolDownPeriod}, and here is slippage tolerence {slippageAllowance} and here is exchangeName {exchangeName}')
-  return(f'This is unutilized leverage percentage {unutilizedLeveragePercent} and this is twapmaxtradesize {twapMaxTradeSize}, and here is cooldown {coolDownPeriod}, and here is slippage tolerence {slippageAllowance} and here is exchangeName {exchangeName}')
+  return(f'This is unutilized leverage percentage {getPercent(execut[0]} and this is twapmaxtradesize {getPercent(execut[1]}, and here is cooldown {getPercent(execut[2]}, and here is slippage tolerence {getPercent(execut[3]} and here is exchangeName {execut[4]}')
 
 # struct IncentiveSettings {
 #     uint256 etherReward;                             // ETH reward for incentivized rebalances
@@ -73,7 +83,6 @@ def getExecution(address):
 #     uint256 incentivizedTwapCooldownPeriod;          // TWAP cooldown in seconds for incentivized rebalances
 #     uint256 incentivizedTwapMaxTradeSize;            // Max trade size for incentivized rebalances in collateral base units
 # }
-
 
 def getIncentive(address):
     #currently just returning the incentivizedLeverageRatio
@@ -100,14 +109,7 @@ def getIncentive(address):
 def getMethodology(address):
   contract = w3.eth.contract(address=address, abi=getAbi(address))
   execut = contract.functions.getMethodology().call()
-  #targetLeverageRatio = int(execut[0]/1000000000000000000)
-  targetLeverageRatio = float(execut[0]*1e-18)
-  minLeverageRatio = round(float(execut[1]*1e-18),2)
-  #'{0:.3g}'.format(num)
-  maxLeverageRatio = round(float(execut[2]*1e-18),2)
-  recenteringSpeed = round(float(execut[3]*1e-18),2)
-  rebalanceInterval = execut[4]/60
-  return(f' targetleverage -> {targetLeverageRatio} minLevRatio -> {minLeverageRatio}, maxLevRatio -> {maxLeverageRatio}, recentingspeed -> {recenteringSpeed} rebalance interbal -> {rebalanceInterval}')
+  return(f' targetleverage -> {roundFloat(exect[0])} minLevRatio -> {roundFloat(execut[1])}, maxLevRatio -> {roundFloat(execut[2])}, recentingspeed -> {oundFloat(execut[3])} rebalance interbal -> {execut[4]/60}')
     
 def getCurrentAndTotalSupply(address,address1):
   check = w3.toChecksumAddress(address)
